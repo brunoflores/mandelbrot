@@ -27,9 +27,12 @@ fn main() {
         std::process::exit(1);
     }
 
-    let bounds = parse_pair(&args[2], 'x').expect("error parsing image dimensions");
-    let upper_left = parse_complex(&args[3]).expect("error parsing upper left corner point");
-    let lower_right = parse_complex(&args[4]).expect("error parsing lower right corner point");
+    let bounds =
+        parse_pair(&args[2], 'x').expect("error parsing image dimensions");
+    let upper_left =
+        parse_complex(&args[3]).expect("error parsing upper left corner point");
+    let lower_right = parse_complex(&args[4])
+        .expect("error parsing lower right corner point");
 
     let mut pixels = vec![0; bounds.0 * bounds.1];
 
@@ -40,7 +43,11 @@ fn main() {
 
 /// Write the buffer `pixels`, whose dimensions are given by `bounds`, to the
 /// file named `filename`.
-fn write_image(filename: &str, pixels: &[u8], bounds: (usize, usize)) -> Result<()> {
+fn write_image(
+    filename: &str,
+    pixels: &[u8],
+    bounds: (usize, usize),
+) -> Result<()> {
     let output = File::create(filename)?;
 
     let encoder = PNGEncoder::new(output);
@@ -70,7 +77,8 @@ fn render(
 
     for row in 0..bounds.1 {
         for column in 0..bounds.0 {
-            let point = pixel_to_point(bounds, (column, row), upper_left, lower_right);
+            let point =
+                pixel_to_point(bounds, (column, row), upper_left, lower_right);
             pixels[row * bounds.0 + column] = match escape_time(point, 255) {
                 None => 0,
                 Some(count) => 255 - count as u8,
@@ -167,10 +175,12 @@ fn test_parse_complex() {
 fn parse_pair<T: FromStr>(s: &str, separator: char) -> Option<(T, T)> {
     match s.find(separator) {
         None => None,
-        Some(index) => match (T::from_str(&s[..index]), T::from_str(&s[index + 1..])) {
-            (Ok(l), Ok(r)) => Some((l, r)),
-            _ => None,
-        },
+        Some(index) => {
+            match (T::from_str(&s[..index]), T::from_str(&s[index + 1..])) {
+                (Ok(l), Ok(r)) => Some((l, r)),
+                _ => None,
+            }
+        }
     }
 }
 
